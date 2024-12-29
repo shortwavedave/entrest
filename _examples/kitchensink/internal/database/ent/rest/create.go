@@ -9,6 +9,7 @@ import (
 	github "github.com/google/go-github/v66/github"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/category"
+	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/dog"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/follows"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/friendship"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/pet"
@@ -50,6 +51,27 @@ func (c *CreateCategoryParams) Exec(ctx context.Context, builder *ent.CategoryCr
 		return nil, err
 	}
 	return EagerLoadCategory(query.Where(category.ID(result.ID))).Only(ctx)
+}
+
+// CreateDogParams defines parameters for creating a Dog via a POST request.
+type CreateDogParams struct {
+	Name string `json:"name"`
+}
+
+func (c *CreateDogParams) ApplyInputs(builder *ent.DogCreate) *ent.DogCreate {
+	builder.SetName(c.Name)
+	return builder
+}
+
+// Exec wraps all logic (mapping all provided values to the builder), creates the entity,
+// and does another query (using provided query as base) to get the entity, with all eager
+// loaded edges.
+func (c *CreateDogParams) Exec(ctx context.Context, builder *ent.DogCreate, query *ent.DogQuery) (*ent.Dog, error) {
+	result, err := c.ApplyInputs(builder).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return EagerLoadDog(query.Where(dog.ID(result.ID))).Only(ctx)
 }
 
 // CreateFollowParams defines parameters for creating a Follow via a POST request.

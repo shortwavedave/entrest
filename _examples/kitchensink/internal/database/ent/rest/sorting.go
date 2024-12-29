@@ -92,6 +92,16 @@ var (
 		DefaultField: "id",
 		DefaultOrder: "asc",
 	}
+	// DogSortConfig defines the default sort configuration for Dog.
+	DogSortConfig = &SortConfig{
+		Fields: []string{
+			"id",
+			"name",
+			"random",
+		},
+		DefaultField: "id",
+		DefaultOrder: "asc",
+	}
 	// FollowSortConfig defines the default sort configuration for Follow.
 	FollowSortConfig = &SortConfig{
 		Fields: []string{
@@ -210,6 +220,15 @@ func applySortingCategory(query *ent.CategoryQuery, field string, order orderDir
 			}
 		}
 	}
+	if field == "random" {
+		return query.Order(sql.OrderByRand())
+	}
+	return query.Order(withFieldSelector(field, order))
+}
+
+// applySortingDog applies sorting to the query based on the provided sort and
+// order fields. Note that all inputs provided MUST ALREADY BE VALIDATED.
+func applySortingDog(query *ent.DogQuery, field string, order orderDirection) *ent.DogQuery {
 	if field == "random" {
 		return query.Order(sql.OrderByRand())
 	}

@@ -28,6 +28,20 @@
         }
     }
 
+    // ReqIDStr is similar to Req, but also processes an "id" string path parameter and provides it to the
+    // handler function.
+    func ReqIDStr[Resp any](s *Server, op Operation, fn func(*http.Request, string) (*Resp, error)) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            id := r.PathValue("id")
+            if id == "" {
+                handleResponse[Resp](s, w, r, op, nil, fmt.Errorf("id parameter is required"))
+                return
+            }
+            results, err := fn(r, id)
+            handleResponse(s, w, r, op, results, err)
+        }
+    }
+
     // ReqParam is similar to Req, but also processes a request body/query params and provides it
     // to the handler function.
     func ReqParam[Params, Resp any](s *Server, op Operation, fn func(*http.Request, *Params) (*Resp, error)) http.HandlerFunc {
@@ -53,6 +67,26 @@
             }
             params := new(Params)
             err = Bind(r, params)
+            if err != nil {
+                handleResponse[Resp](s, w, r, op, nil, err)
+                return
+            }
+            results, err := fn(r, id, params)
+            handleResponse(s, w, r, op, results, err)
+        }
+    }
+
+    // ReqIDParamStr is similar to ReqParam, but also processes an "id" path parameter as a string and request
+    // body/query params, and provides it to the handler function.
+    func ReqIDParamStr[Params, Resp any](s *Server, op Operation, fn func(*http.Request, string, *Params) (*Resp, error)) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            id := r.PathValue("id")
+            if id == "" {
+                handleResponse[Resp](s, w, r, op, nil, fmt.Errorf("id parameter is required"))
+                return
+            }
+            params := new(Params)
+            err := Bind(r, params)
             if err != nil {
                 handleResponse[Resp](s, w, r, op, nil, err)
                 return

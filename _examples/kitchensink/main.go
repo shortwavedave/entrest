@@ -84,6 +84,8 @@ func main() {
 			ExecX(ctx)
 	}
 
+	db.Dog.Create().SetName("George").SaveX(ctx)
+
 	srv, err := rest.NewServer(db, &rest.ServerConfig{})
 	if err != nil {
 		panic(err)

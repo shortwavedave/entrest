@@ -9,6 +9,7 @@ import (
 	github "github.com/google/go-github/v66/github"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/category"
+	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/dog"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/friendship"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/pet"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/settings"
@@ -60,6 +61,30 @@ func (c *UpdateCategoryParams) Exec(ctx context.Context, builder *ent.CategoryUp
 		return nil, err
 	}
 	return EagerLoadCategory(query.Where(category.ID(result.ID))).Only(ctx)
+}
+
+// UpdateDogParams defines parameters for updating a Dog via a PATCH request.
+type UpdateDogParams struct {
+	Name Option[string] `json:"name"`
+}
+
+func (u *UpdateDogParams) ApplyInputs(builder *ent.DogUpdateOne) *ent.DogUpdateOne {
+	if v, ok := u.Name.Get(); ok {
+		builder.SetName(v)
+	}
+
+	return builder
+}
+
+// Exec wraps all logic (mapping all provided values to the build), updates the entity,
+// and does another query (using provided query as base) to get the entity, with all eager
+// loaded edges.
+func (c *UpdateDogParams) Exec(ctx context.Context, builder *ent.DogUpdateOne, query *ent.DogQuery) (*ent.Dog, error) {
+	result, err := c.ApplyInputs(builder).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return EagerLoadDog(query.Where(dog.ID(result.ID))).Only(ctx)
 }
 
 // UpdateFriendshipParams defines parameters for updating a Friendship via a PATCH request.

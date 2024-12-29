@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/category"
+	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/dog"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/follows"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/friendship"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/pet"
@@ -37,6 +38,12 @@ func init() {
 	categoryDescNillable := categoryFields[3].Descriptor()
 	// category.DefaultNillable holds the default value on creation for the nillable field.
 	category.DefaultNillable = categoryDescNillable.Default.(string)
+	dogFields := schema.Dog{}.Fields()
+	_ = dogFields
+	// dogDescID is the schema descriptor for id field.
+	dogDescID := dogFields[0].Descriptor()
+	// dog.DefaultID holds the default value on creation for the id field.
+	dog.DefaultID = dogDescID.Default.(string)
 	followsFields := schema.Follows{}.Fields()
 	_ = followsFields
 	// followsDescFollowedAt is the schema descriptor for followed_at field.

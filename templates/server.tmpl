@@ -182,6 +182,14 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
             $t.Annotations.Rest.DisableHandler
         }}{{ continue }}{{ end }}
 
+        {{- /* Determine the ID type for this node */}}
+        {{- $idField := "int" }} {{/* Default ID type */}}
+        {{- if $t.ID }}
+            {{- if $t.ID.Type }}
+                {{- $idField = $t.ID.Type.String }}
+            {{- end }}
+        {{- end }}
+
         {{- /* list nodes */}}
         {{- if ($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "list" }}
             {{- template "helper/rest/server/endpoint" (dict
@@ -194,12 +202,21 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
 
         {{- /* get single node */}}
         {{- if and $t.ID (($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "read") }}
-            {{- template "helper/rest/server/endpoint" (dict
-                "Handler" $.Annotations.RestConfig.Handler
-                "Method" "GET"
-                "Path" (getPathName "read" $t nil false)
-                "Func" (printf "ReqID(s, OperationRead, s.%s)" (getOperationIDName "read" $t nil | zpascal))
-            ) }}
+            {{- if eq $idField "string" }}
+                {{- template "helper/rest/server/endpoint" (dict
+                    "Handler" $.Annotations.RestConfig.Handler
+                    "Method" "GET"
+                    "Path" (getPathName "read" $t nil false)
+                    "Func" (printf "ReqIDStr(s, OperationRead, s.%s)" (getOperationIDName "read" $t nil | zpascal))
+                ) }}
+            {{- else }}
+                {{- template "helper/rest/server/endpoint" (dict
+                    "Handler" $.Annotations.RestConfig.Handler
+                    "Method" "GET"
+                    "Path" (getPathName "read" $t nil false)
+                    "Func" (printf "ReqID(s, OperationRead, s.%s)" (getOperationIDName "read" $t nil | zpascal))
+                ) }}
+            {{- end }}
         {{- end }}
 
         {{- range $e := $t.Edges }}
@@ -244,22 +261,40 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
 
         {{- /* update nodes */}}
         {{- if and $t.ID (($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "update") }}
-            {{- template "helper/rest/server/endpoint" (dict
-                "Handler" $.Annotations.RestConfig.Handler
-                "Method" "PATCH"
-                "Path" (getPathName "update" $t nil false)
-                "Func" (printf "ReqIDParam(s, OperationUpdate, s.%s)" (getOperationIDName "update" $t nil | zpascal))
-            ) }}
+            {{- if eq $idField "string" }}
+                {{- template "helper/rest/server/endpoint" (dict
+                    "Handler" $.Annotations.RestConfig.Handler
+                    "Method" "PATCH"
+                    "Path" (getPathName "update" $t nil false)
+                    "Func" (printf "ReqIDParamStr(s, OperationUpdate, s.%s)" (getOperationIDName "update" $t nil | zpascal))
+                ) }}
+            {{- else }}
+                {{- template "helper/rest/server/endpoint" (dict
+                    "Handler" $.Annotations.RestConfig.Handler
+                    "Method" "PATCH"
+                    "Path" (getPathName "update" $t nil false)
+                    "Func" (printf "ReqIDParam(s, OperationUpdate, s.%s)" (getOperationIDName "update" $t nil | zpascal))
+                ) }}
+            {{- end }}
         {{- end }}
 
         {{- /* delete nodes */}}
         {{- if and $t.ID (($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "delete") }}
-            {{- template "helper/rest/server/endpoint" (dict
-                "Handler" $.Annotations.RestConfig.Handler
-                "Method" "DELETE"
-                "Path" (getPathName "delete" $t nil false)
-                "Func" (printf "ReqID(s, OperationDelete, s.%s)" (getOperationIDName "delete" $t nil | zpascal))
-            ) }}
+            {{- if eq $idField "string" }}
+                {{- template "helper/rest/server/endpoint" (dict
+                    "Handler" $.Annotations.RestConfig.Handler
+                    "Method" "DELETE"
+                    "Path" (getPathName "delete" $t nil false)
+                    "Func" (printf "ReqIDStr(s, OperationDelete, s.%s)" (getOperationIDName "delete" $t nil | zpascal))
+                ) }}
+            {{- else }}
+                {{- template "helper/rest/server/endpoint" (dict
+                    "Handler" $.Annotations.RestConfig.Handler
+                    "Method" "DELETE"
+                    "Path" (getPathName "delete" $t nil false)
+                    "Func" (printf "ReqID(s, OperationDelete, s.%s)" (getOperationIDName "delete" $t nil | zpascal))
+                ) }}
+            {{- end }}
         {{- end }}
     {{- end }}
 
@@ -276,6 +311,14 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
     {{- if (($t|getAnnotation).GetSkip $t.Config.Annotations.RestConfig) }}{{ continue }}{{ end }}
     {{- $id := printf "%sID" ($t.Name|zsingular|zcamel) }}
 
+    {{- /* Determine the ID type for this node */}}
+    {{- $idField := "int" }} {{/* Default ID type */}}
+    {{- if $t.ID }}
+        {{- if $t.ID.Type }}
+            {{- $idField = $t.ID.Type.String }}
+        {{- end }}
+    {{- end }}
+
     {{- /* list nodes */}}
     {{- if ($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "list" }}
         {{- $opID := getOperationIDName "list" $t nil | zpascal }}
@@ -289,7 +332,7 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
     {{- if and $t.ID (($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "read") }}
         {{- $opID := getOperationIDName "read" $t nil | zpascal }}
         // {{ $opID }} maps to "GET {{ getPathName "read" $t nil false }}".
-        func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} int) (*ent.{{ $t.Name }}, error) {
+        func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} {{ $idField }}) (*ent.{{ $t.Name }}, error) {
             return EagerLoad{{ $t.Name|zsingular }}(s.db.{{ $t.Name }}.Query().Where({{ $t.Package }}.ID({{ $id }}))).Only(r.Context())
         }
     {{- end }}
@@ -306,7 +349,7 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
         {{- if and $e.Unique (($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "read") }}
             {{- $opID := getOperationIDName "read" $t $e | zpascal }}
             // {{ $opID }} maps to "GET {{ getPathName "read" $t $e false }}".
-            func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} int) (*ent.{{ $e.Type.Name }}, error) {
+            func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} {{ $idField }}) (*ent.{{ $e.Type.Name }}, error) {
                 return EagerLoad{{ $e.Type.Name|zsingular }}(s.db.{{ $t.Name }}.Query().Where({{ $t.Package }}.ID({{ $id }})).Query{{ $e.StructField }}()).Only(r.Context())
             }
         {{- end }}
@@ -315,7 +358,7 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
         {{- if and (not $e.Unique) (($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "list") }}
             {{- $opID := getOperationIDName "list" $t $e | zpascal }}
             // {{ $opID }} maps to "GET {{ getPathName "list" $t $e false }}".
-            func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} int, p *List{{ $e.Type.Name|zsingular }}Params) (*PagedResponse[ent.{{ $e.Type.Name }}], error) {
+            func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} {{ $idField }}, p *List{{ $e.Type.Name|zsingular }}Params) (*PagedResponse[ent.{{ $e.Type.Name }}], error) {
                 return p.Exec(r.Context(), s.db.{{ $t.Name }}.Query().Where({{ $t.Package }}.ID({{ $id }})).Query{{ $e.StructField }}())
             }
         {{- end }}
@@ -334,7 +377,7 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
     {{- if and $t.ID (($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "update") }}
         {{- $opID := getOperationIDName "update" $t nil | zpascal }}
         // {{ $opID }} maps to "PATCH {{ getPathName "update" $t nil false }}".
-        func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} int, p *Update{{ $t.Name|zsingular }}Params) (*ent.{{ $t.Name }}, error) {
+        func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} {{ $idField }}, p *Update{{ $t.Name|zsingular }}Params) (*ent.{{ $t.Name }}, error) {
             return p.Exec(r.Context(), s.db.{{ $t.Name }}.UpdateOneID({{ $id }}), s.db.{{ $t.Name }}.Query())
         }
     {{- end }}
@@ -343,7 +386,7 @@ func UseEntContext(db *ent.Client) func(next http.Handler) http.Handler {
     {{- if and $t.ID (($t|getAnnotation).HasOperation $t.Config.Annotations.RestConfig "delete") }}
         {{- $opID := getOperationIDName "delete" $t nil | zpascal }}
         // {{ $opID }} maps to "DELETE {{ getPathName "delete" $t nil false }}".
-        func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} int) (*struct{}, error) {
+        func (s *Server) {{ $opID }}(r *http.Request, {{ $id }} {{ $idField }}) (*struct{}, error) {
             return nil, s.db.{{ $t.Name }}.DeleteOneID({{ $id }}).Exec(r.Context())
         }
     {{- end }}

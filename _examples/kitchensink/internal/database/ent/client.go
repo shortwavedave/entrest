@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/category"
+	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/dog"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/follows"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/friendship"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/pet"
@@ -31,6 +32,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
+	// Dog is the client for interacting with the Dog builders.
+	Dog *DogClient
 	// Follows is the client for interacting with the Follows builders.
 	Follows *FollowsClient
 	// Friendship is the client for interacting with the Friendship builders.
@@ -55,6 +58,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Category = NewCategoryClient(c.config)
+	c.Dog = NewDogClient(c.config)
 	c.Follows = NewFollowsClient(c.config)
 	c.Friendship = NewFriendshipClient(c.config)
 	c.Pet = NewPetClient(c.config)
@@ -154,6 +158,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:        ctx,
 		config:     cfg,
 		Category:   NewCategoryClient(cfg),
+		Dog:        NewDogClient(cfg),
 		Follows:    NewFollowsClient(cfg),
 		Friendship: NewFriendshipClient(cfg),
 		Pet:        NewPetClient(cfg),
@@ -180,6 +185,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:        ctx,
 		config:     cfg,
 		Category:   NewCategoryClient(cfg),
+		Dog:        NewDogClient(cfg),
 		Follows:    NewFollowsClient(cfg),
 		Friendship: NewFriendshipClient(cfg),
 		Pet:        NewPetClient(cfg),
@@ -215,7 +221,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Category, c.Follows, c.Friendship, c.Pet, c.Settings, c.Skipped, c.User,
+		c.Category, c.Dog, c.Follows, c.Friendship, c.Pet, c.Settings, c.Skipped,
+		c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -225,7 +232,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Category, c.Follows, c.Friendship, c.Pet, c.Settings, c.Skipped, c.User,
+		c.Category, c.Dog, c.Follows, c.Friendship, c.Pet, c.Settings, c.Skipped,
+		c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -236,6 +244,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *CategoryMutation:
 		return c.Category.mutate(ctx, m)
+	case *DogMutation:
+		return c.Dog.mutate(ctx, m)
 	case *FollowsMutation:
 		return c.Follows.mutate(ctx, m)
 	case *FriendshipMutation:
@@ -399,6 +409,139 @@ func (c *CategoryClient) mutate(ctx context.Context, m *CategoryMutation) (Value
 		return (&CategoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Category mutation op: %q", m.Op())
+	}
+}
+
+// DogClient is a client for the Dog schema.
+type DogClient struct {
+	config
+}
+
+// NewDogClient returns a client for the Dog from the given config.
+func NewDogClient(c config) *DogClient {
+	return &DogClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dog.Hooks(f(g(h())))`.
+func (c *DogClient) Use(hooks ...Hook) {
+	c.hooks.Dog = append(c.hooks.Dog, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dog.Intercept(f(g(h())))`.
+func (c *DogClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Dog = append(c.inters.Dog, interceptors...)
+}
+
+// Create returns a builder for creating a Dog entity.
+func (c *DogClient) Create() *DogCreate {
+	mutation := newDogMutation(c.config, OpCreate)
+	return &DogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Dog entities.
+func (c *DogClient) CreateBulk(builders ...*DogCreate) *DogCreateBulk {
+	return &DogCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DogClient) MapCreateBulk(slice any, setFunc func(*DogCreate, int)) *DogCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DogCreateBulk{err: fmt.Errorf("calling to DogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DogCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DogCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Dog.
+func (c *DogClient) Update() *DogUpdate {
+	mutation := newDogMutation(c.config, OpUpdate)
+	return &DogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DogClient) UpdateOne(d *Dog) *DogUpdateOne {
+	mutation := newDogMutation(c.config, OpUpdateOne, withDog(d))
+	return &DogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DogClient) UpdateOneID(id string) *DogUpdateOne {
+	mutation := newDogMutation(c.config, OpUpdateOne, withDogID(id))
+	return &DogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Dog.
+func (c *DogClient) Delete() *DogDelete {
+	mutation := newDogMutation(c.config, OpDelete)
+	return &DogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DogClient) DeleteOne(d *Dog) *DogDeleteOne {
+	return c.DeleteOneID(d.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DogClient) DeleteOneID(id string) *DogDeleteOne {
+	builder := c.Delete().Where(dog.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DogDeleteOne{builder}
+}
+
+// Query returns a query builder for Dog.
+func (c *DogClient) Query() *DogQuery {
+	return &DogQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDog},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Dog entity by its id.
+func (c *DogClient) Get(ctx context.Context, id string) (*Dog, error) {
+	return c.Query().Where(dog.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DogClient) GetX(ctx context.Context, id string) *Dog {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DogClient) Hooks() []Hook {
+	return c.hooks.Dog
+}
+
+// Interceptors returns the client interceptors.
+func (c *DogClient) Interceptors() []Interceptor {
+	return c.inters.Dog
+}
+
+func (c *DogClient) mutate(ctx context.Context, m *DogMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Dog mutation op: %q", m.Op())
 	}
 }
 
@@ -1394,9 +1537,10 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Category, Follows, Friendship, Pet, Settings, Skipped, User []ent.Hook
+		Category, Dog, Follows, Friendship, Pet, Settings, Skipped, User []ent.Hook
 	}
 	inters struct {
-		Category, Follows, Friendship, Pet, Settings, Skipped, User []ent.Interceptor
+		Category, Dog, Follows, Friendship, Pet, Settings, Skipped,
+		User []ent.Interceptor
 	}
 )

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/category"
+	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/dog"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/follows"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/friendship"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/pet"
@@ -80,6 +81,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			category.Table:   category.ValidColumn,
+			dog.Table:        dog.ValidColumn,
 			follows.Table:    follows.ValidColumn,
 			friendship.Table: friendship.ValidColumn,
 			pet.Table:        pet.ValidColumn,

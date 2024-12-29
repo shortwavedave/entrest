@@ -20,6 +20,7 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/category"
+	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/dog"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/friendship"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/pet"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/privacy"
@@ -181,6 +182,20 @@ func ReqID[Resp any](s *Server, op Operation, fn func(*http.Request, int) (*Resp
 	}
 }
 
+// ReqIDStr is similar to Req, but also processes an "id" string path parameter and provides it to the
+// handler function.
+func ReqIDStr[Resp any](s *Server, op Operation, fn func(*http.Request, string) (*Resp, error)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if id == "" {
+			handleResponse[Resp](s, w, r, op, nil, fmt.Errorf("id parameter is required"))
+			return
+		}
+		results, err := fn(r, id)
+		handleResponse(s, w, r, op, results, err)
+	}
+}
+
 // ReqParam is similar to Req, but also processes a request body/query params and provides it
 // to the handler function.
 func ReqParam[Params, Resp any](s *Server, op Operation, fn func(*http.Request, *Params) (*Resp, error)) http.HandlerFunc {
@@ -206,6 +221,26 @@ func ReqIDParam[Params, Resp any](s *Server, op Operation, fn func(*http.Request
 		}
 		params := new(Params)
 		err = Bind(r, params)
+		if err != nil {
+			handleResponse[Resp](s, w, r, op, nil, err)
+			return
+		}
+		results, err := fn(r, id, params)
+		handleResponse(s, w, r, op, results, err)
+	}
+}
+
+// ReqIDParamStr is similar to ReqParam, but also processes an "id" path parameter as a string and request
+// body/query params, and provides it to the handler function.
+func ReqIDParamStr[Params, Resp any](s *Server, op Operation, fn func(*http.Request, string, *Params) (*Resp, error)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if id == "" {
+			handleResponse[Resp](s, w, r, op, nil, fmt.Errorf("id parameter is required"))
+			return
+		}
+		params := new(Params)
+		err := Bind(r, params)
 		if err != nil {
 			handleResponse[Resp](s, w, r, op, nil, err)
 			return
@@ -524,6 +559,11 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /categories", ReqParam(s, OperationCreate, s.CreateCategory))
 	mux.HandleFunc("PATCH /categories/{id}", ReqIDParam(s, OperationUpdate, s.UpdateCategory))
 	mux.HandleFunc("DELETE /categories/{id}", ReqID(s, OperationDelete, s.DeleteCategory))
+	mux.HandleFunc("GET /dogs", ReqParam(s, OperationList, s.ListDogs))
+	mux.HandleFunc("GET /dogs/{id}", ReqIDStr(s, OperationRead, s.GetDog))
+	mux.HandleFunc("POST /dogs", ReqParam(s, OperationCreate, s.CreateDog))
+	mux.HandleFunc("PATCH /dogs/{id}", ReqIDParamStr(s, OperationUpdate, s.UpdateDog))
+	mux.HandleFunc("DELETE /dogs/{id}", ReqIDStr(s, OperationDelete, s.DeleteDog))
 	mux.HandleFunc("GET /follows", ReqParam(s, OperationList, s.ListFollows))
 	mux.HandleFunc("POST /follows", ReqParam(s, OperationCreate, s.CreateFollow))
 	mux.HandleFunc("GET /friendships", ReqParam(s, OperationList, s.ListFriendships))
@@ -601,6 +641,31 @@ func (s *Server) UpdateCategory(r *http.Request, categoryID int, p *UpdateCatego
 // DeleteCategory maps to "DELETE /categories/{id}".
 func (s *Server) DeleteCategory(r *http.Request, categoryID int) (*struct{}, error) {
 	return nil, s.db.Category.DeleteOneID(categoryID).Exec(r.Context())
+}
+
+// ListDogs maps to "GET /dogs".
+func (s *Server) ListDogs(r *http.Request, p *ListDogParams) (*PagedResponse[ent.Dog], error) {
+	return p.Exec(r.Context(), s.db.Dog.Query())
+}
+
+// GetDog maps to "GET /dogs/{id}".
+func (s *Server) GetDog(r *http.Request, dogID string) (*ent.Dog, error) {
+	return EagerLoadDog(s.db.Dog.Query().Where(dog.ID(dogID))).Only(r.Context())
+}
+
+// CreateDog maps to "POST /dogs".
+func (s *Server) CreateDog(r *http.Request, p *CreateDogParams) (*ent.Dog, error) {
+	return p.Exec(r.Context(), s.db.Dog.Create(), s.db.Dog.Query())
+}
+
+// UpdateDog maps to "PATCH /dogs/{id}".
+func (s *Server) UpdateDog(r *http.Request, dogID string, p *UpdateDogParams) (*ent.Dog, error) {
+	return p.Exec(r.Context(), s.db.Dog.UpdateOneID(dogID), s.db.Dog.Query())
+}
+
+// DeleteDog maps to "DELETE /dogs/{id}".
+func (s *Server) DeleteDog(r *http.Request, dogID string) (*struct{}, error) {
+	return nil, s.db.Dog.DeleteOneID(dogID).Exec(r.Context())
 }
 
 // ListFollows maps to "GET /follows".

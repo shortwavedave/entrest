@@ -12,6 +12,12 @@ func EagerLoadCategory(query *ent.CategoryQuery) *ent.CategoryQuery {
 	return query
 }
 
+// EagerLoadDog eager-loads the edges of a Dog entity, if any edges
+// were requested to be eager-loaded, based off associated annotations.
+func EagerLoadDog(query *ent.DogQuery) *ent.DogQuery {
+	return query
+}
+
 // EagerLoadFollow eager-loads the edges of a Follow entity, if any edges
 // were requested to be eager-loaded, based off associated annotations.
 func EagerLoadFollow(query *ent.FollowsQuery) *ent.FollowsQuery {

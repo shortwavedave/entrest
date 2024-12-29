@@ -26,6 +26,17 @@ var (
 		Columns:    CategoriesColumns,
 		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
 	}
+	// DogsColumns holds the columns for the "dogs" table.
+	DogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+	}
+	// DogsTable holds the schema information for the "dogs" table.
+	DogsTable = &schema.Table{
+		Name:       "dogs",
+		Columns:    DogsColumns,
+		PrimaryKey: []*schema.Column{DogsColumns[0]},
+	}
 	// FollowsColumns holds the columns for the "follows" table.
 	FollowsColumns = []*schema.Column{
 		{Name: "followed_at", Type: field.TypeTime},
@@ -216,6 +227,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CategoriesTable,
+		DogsTable,
 		FollowsTable,
 		FriendshipsTable,
 		PetsTable,

@@ -134,6 +134,30 @@ func (f CategoryMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutati
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.CategoryMutation", m)
 }
 
+// The DogQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type DogQueryRuleFunc func(context.Context, *ent.DogQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f DogQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.DogQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.DogQuery", q)
+}
+
+// The DogMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type DogMutationRuleFunc func(context.Context, *ent.DogMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f DogMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.DogMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.DogMutation", m)
+}
+
 // The FollowsQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type FollowsQueryRuleFunc func(context.Context, *ent.FollowsQuery) error

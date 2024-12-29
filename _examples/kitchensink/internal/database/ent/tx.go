@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
+	// Dog is the client for interacting with the Dog builders.
+	Dog *DogClient
 	// Follows is the client for interacting with the Follows builders.
 	Follows *FollowsClient
 	// Friendship is the client for interacting with the Friendship builders.
@@ -158,6 +160,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Category = NewCategoryClient(tx.config)
+	tx.Dog = NewDogClient(tx.config)
 	tx.Follows = NewFollowsClient(tx.config)
 	tx.Friendship = NewFriendshipClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)

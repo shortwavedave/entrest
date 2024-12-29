@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/category"
+	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/dog"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/friendship"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/pet"
 	"github.com/lrstanley/entrest/_examples/kitchensink/internal/database/ent/predicate"
@@ -38,6 +39,13 @@ var (
 	// CategoryPageConfig defines the page configuration for LIST-related endpoints
 	// for Category.
 	CategoryPageConfig = &PageConfig{
+		MinItemsPerPage: DefaultPageConfig.MinItemsPerPage,
+		ItemsPerPage:    DefaultPageConfig.ItemsPerPage,
+		MaxItemsPerPage: DefaultPageConfig.MaxItemsPerPage,
+	}
+	// DogPageConfig defines the page configuration for LIST-related endpoints
+	// for Dog.
+	DogPageConfig = &PageConfig{
 		MinItemsPerPage: DefaultPageConfig.MinItemsPerPage,
 		ItemsPerPage:    DefaultPageConfig.ItemsPerPage,
 		MaxItemsPerPage: DefaultPageConfig.MaxItemsPerPage,
@@ -311,6 +319,119 @@ func (l *ListCategoryParams) Exec(ctx context.Context, query *ent.CategoryQuery)
 		return nil, err
 	}
 	return l.ExecutePaginated(ctx, query, CategoryPageConfig)
+}
+
+// ListDogParams defines parameters for listing Dogs via a GET request.
+type ListDogParams struct {
+	Sorted
+	Paginated[*ent.DogQuery, ent.Dog]
+	Filtered[predicate.Dog]
+
+	// Filters field "id" to be equal to the provided value.
+	DogIDEQ *string `form:"id.eq,omitempty" json:"dog_ideq,omitempty"`
+	// Filters field "id" to be not equal to the provided value.
+	DogIDNEQ *string `form:"id.neq,omitempty" json:"dog_idneq,omitempty"`
+	// Filters field "id" to be within the provided values.
+	DogIDIn []string `form:"id.in,omitempty" json:"dog_id_in,omitempty"`
+	// Filters field "id" to be not within the provided values.
+	DogIDNotIn []string `form:"id.notIn,omitempty" json:"dog_id_not_in,omitempty"`
+	// Filters field "id" to be equal to the provided value, case-insensitive.
+	DogIDEqualFold *string `form:"id.ieq,omitempty" json:"dog_id_equal_fold,omitempty"`
+	// Filters field "name" to be equal to the provided value.
+	DogNameEQ *string `form:"name.eq,omitempty" json:"dog_name_eq,omitempty"`
+	// Filters field "name" to be not equal to the provided value.
+	DogNameNEQ *string `form:"name.neq,omitempty" json:"dog_name_neq,omitempty"`
+	// Filters field "name" to be within the provided values.
+	DogNameIn []string `form:"name.in,omitempty" json:"dog_name_in,omitempty"`
+	// Filters field "name" to be not within the provided values.
+	DogNameNotIn []string `form:"name.notIn,omitempty" json:"dog_name_not_in,omitempty"`
+	// Filters field "name" to be equal to the provided value, case-insensitive.
+	DogNameEqualFold *string `form:"name.ieq,omitempty" json:"dog_name_equal_fold,omitempty"`
+	// Filters field "name" to contain the provided value.
+	DogNameContains *string `form:"name.has,omitempty" json:"dog_name_contains,omitempty"`
+	// Filters field "name" to contain the provided value, case-insensitive.
+	DogNameContainsFold *string `form:"name.ihas,omitempty" json:"dog_name_contains_fold,omitempty"`
+	// Filters field "name" to start with the provided value.
+	DogNameHasPrefix *string `form:"name.prefix,omitempty" json:"dog_name_has_prefix,omitempty"`
+	// Filters field "name" to end with the provided value.
+	DogNameHasSuffix *string `form:"name.suffix,omitempty" json:"dog_name_has_suffix,omitempty"`
+}
+
+// FilterPredicates returns the predicates for filter-related parameters in Dog.
+func (l *ListDogParams) FilterPredicates() (predicate.Dog, error) {
+	var predicates []predicate.Dog
+
+	if l.DogIDEQ != nil {
+		predicates = append(predicates, dog.IDEQ(*l.DogIDEQ))
+	}
+	if l.DogIDNEQ != nil {
+		predicates = append(predicates, dog.IDNEQ(*l.DogIDNEQ))
+	}
+	if l.DogIDIn != nil {
+		predicates = append(predicates, dog.IDIn(l.DogIDIn...))
+	}
+	if l.DogIDNotIn != nil {
+		predicates = append(predicates, dog.IDNotIn(l.DogIDNotIn...))
+	}
+	if l.DogIDEqualFold != nil {
+		predicates = append(predicates, dog.IDEqualFold(*l.DogIDEqualFold))
+	}
+	if l.DogNameEQ != nil {
+		predicates = append(predicates, dog.NameEQ(*l.DogNameEQ))
+	}
+	if l.DogNameNEQ != nil {
+		predicates = append(predicates, dog.NameNEQ(*l.DogNameNEQ))
+	}
+	if l.DogNameIn != nil {
+		predicates = append(predicates, dog.NameIn(l.DogNameIn...))
+	}
+	if l.DogNameNotIn != nil {
+		predicates = append(predicates, dog.NameNotIn(l.DogNameNotIn...))
+	}
+	if l.DogNameEqualFold != nil {
+		predicates = append(predicates, dog.NameEqualFold(*l.DogNameEqualFold))
+	}
+	if l.DogNameContains != nil {
+		predicates = append(predicates, dog.NameContains(*l.DogNameContains))
+	}
+	if l.DogNameContainsFold != nil {
+		predicates = append(predicates, dog.NameContainsFold(*l.DogNameContainsFold))
+	}
+	if l.DogNameHasPrefix != nil {
+		predicates = append(predicates, dog.NameHasPrefix(*l.DogNameHasPrefix))
+	}
+	if l.DogNameHasSuffix != nil {
+		predicates = append(predicates, dog.NameHasSuffix(*l.DogNameHasSuffix))
+	}
+
+	return l.ApplyFilterOperation(predicates...)
+}
+
+// ApplySorting applies sorting to the query based on the provided sort and order fields.
+func (l *ListDogParams) ApplySorting(query *ent.DogQuery) error {
+	if err := l.Sorted.Validate(DogSortConfig); err != nil {
+		return err
+	}
+	if l.Field == nil { // No custom sort field provided and no defaults, so don't do anything.
+		return nil
+	}
+	applySortingDog(query, *l.Field, *l.Order)
+	return nil
+}
+
+// Exec wraps all logic (filtering, sorting, pagination, eager loading) and
+// executes all necessary queries, returning the results.
+func (l *ListDogParams) Exec(ctx context.Context, query *ent.DogQuery) (results *PagedResponse[ent.Dog], err error) {
+	predicates, err := l.FilterPredicates()
+	if err != nil {
+		return nil, err
+	}
+	query.Where(predicates)
+	err = l.ApplySorting(EagerLoadDog(query))
+	if err != nil {
+		return nil, err
+	}
+	return l.ExecutePaginated(ctx, query, DogPageConfig)
 }
 
 // ListFollowParams defines parameters for listing Follows via a GET request.

@@ -860,6 +860,380 @@
                 }
             ]
         },
+        "/dogs": {
+            "summary": "List dogs",
+            "description": "List Dog entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -\u003e edge, not entity -\u003e edge -\u003e edge -\u003e etc).",
+            "get": {
+                "tags": [
+                    "Dogs"
+                ],
+                "summary": "List dogs",
+                "description": "List Dog entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -\u003e edge, not entity -\u003e edge -\u003e edge -\u003e etc).",
+                "operationId": "listDogs",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "The number of entities to retrieve per page.",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort entity results by the given field.",
+                        "schema": {
+                            "$ref": "#/components/schemas/DogSortableFields",
+                            "default": "id"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Order the results in ascending or descending order.",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "default": "asc"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/FilterOperation"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogIDEQ"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogIDNEQ"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogIDIn"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogIDNotIn"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogIDEqualFold"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameEQ"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameNEQ"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameIn"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameNotIn"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameEqualFold"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameContains"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameContainsFold"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameHasPrefix"
+                    },
+                    {
+                        "$ref": "#/components/parameters/DogNameHasSuffix"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested Dog.",
+                        "headers": {
+                            "X-Ratelimit-Limit": {
+                                "$ref": "#/components/headers/X-Ratelimit-Limit"
+                            },
+                            "X-Ratelimit-Remaining": {
+                                "$ref": "#/components/headers/X-Ratelimit-Remaining"
+                            },
+                            "X-Ratelimit-Reset": {
+                                "$ref": "#/components/headers/X-Ratelimit-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DogList"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ErrorBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/ErrorUnauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/ErrorForbidden"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ErrorNotFound"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/ErrorTooManyRequests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ErrorInternalServerError"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Dogs"
+                ],
+                "summary": "Create a new dog",
+                "description": "Create a new Dog entity. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -\u003e edge, not entity -\u003e edge -\u003e edge -\u003e etc).",
+                "operationId": "createDog",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DogCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The created Dog entity.",
+                        "headers": {
+                            "X-Ratelimit-Limit": {
+                                "$ref": "#/components/headers/X-Ratelimit-Limit"
+                            },
+                            "X-Ratelimit-Remaining": {
+                                "$ref": "#/components/headers/X-Ratelimit-Remaining"
+                            },
+                            "X-Ratelimit-Reset": {
+                                "$ref": "#/components/headers/X-Ratelimit-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DogRead"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ErrorBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/ErrorUnauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/ErrorForbidden"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ErrorNotFound"
+                    },
+                    "409": {
+                        "$ref": "#/components/responses/ErrorConflict"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/ErrorTooManyRequests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ErrorInternalServerError"
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "$ref": "#/components/parameters/PrettyResponse"
+                },
+                {
+                    "$ref": "#/components/parameters/X-Request-Id"
+                }
+            ]
+        },
+        "/dogs/{dogID}": {
+            "summary": "Operate on a single Dog entity",
+            "description": "Operate on a single Dog entity by its ID.",
+            "get": {
+                "tags": [
+                    "Dogs"
+                ],
+                "summary": "Retrieve a dog",
+                "description": "Retrieve a single Dog entity by its ID. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -\u003e edge, not entity -\u003e edge -\u003e edge -\u003e etc).",
+                "operationId": "getDog",
+                "responses": {
+                    "200": {
+                        "description": "The requested Dog entity.",
+                        "headers": {
+                            "X-Ratelimit-Limit": {
+                                "$ref": "#/components/headers/X-Ratelimit-Limit"
+                            },
+                            "X-Ratelimit-Remaining": {
+                                "$ref": "#/components/headers/X-Ratelimit-Remaining"
+                            },
+                            "X-Ratelimit-Reset": {
+                                "$ref": "#/components/headers/X-Ratelimit-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DogRead"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ErrorBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/ErrorUnauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/ErrorForbidden"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ErrorNotFound"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/ErrorTooManyRequests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ErrorInternalServerError"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Dogs"
+                ],
+                "summary": "Delete a dog",
+                "description": "Delete a single Dog entity by its ID.",
+                "operationId": "deleteDog",
+                "responses": {
+                    "204": {
+                        "description": "The requested Dog entity.",
+                        "headers": {
+                            "X-Ratelimit-Limit": {
+                                "$ref": "#/components/headers/X-Ratelimit-Limit"
+                            },
+                            "X-Ratelimit-Remaining": {
+                                "$ref": "#/components/headers/X-Ratelimit-Remaining"
+                            },
+                            "X-Ratelimit-Reset": {
+                                "$ref": "#/components/headers/X-Ratelimit-Reset"
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ErrorBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/ErrorUnauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/ErrorForbidden"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ErrorNotFound"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/ErrorTooManyRequests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ErrorInternalServerError"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Dogs"
+                ],
+                "summary": "Update a dog",
+                "description": "Update an existing Dog entity. If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -\u003e edge, not entity -\u003e edge -\u003e edge -\u003e etc).",
+                "operationId": "updateDog",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DogUpdate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "The update Dog entity.",
+                        "headers": {
+                            "X-Ratelimit-Limit": {
+                                "$ref": "#/components/headers/X-Ratelimit-Limit"
+                            },
+                            "X-Ratelimit-Remaining": {
+                                "$ref": "#/components/headers/X-Ratelimit-Remaining"
+                            },
+                            "X-Ratelimit-Reset": {
+                                "$ref": "#/components/headers/X-Ratelimit-Reset"
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DogRead"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ErrorBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/ErrorUnauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/ErrorForbidden"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ErrorNotFound"
+                    },
+                    "409": {
+                        "$ref": "#/components/responses/ErrorConflict"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/ErrorTooManyRequests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/ErrorInternalServerError"
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "$ref": "#/components/parameters/PrettyResponse"
+                },
+                {
+                    "$ref": "#/components/parameters/DogID"
+                },
+                {
+                    "$ref": "#/components/parameters/X-Request-Id"
+                }
+            ]
+        },
         "/follows": {
             "summary": "List follows",
             "description": "List Follow entities (including pagination, filtering, sorting, etc). If the entity has eager-loaded edges, the depth of when those will be loaded is limited to a depth of 1 (entity -\u003e edge, not entity -\u003e edge -\u003e edge -\u003e etc).",
@@ -7373,6 +7747,83 @@
                     }
                 }
             },
+            "Dog": {
+                "description": "A single Dog entity.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "The ID of the Dog entity.",
+                        "type": "string",
+                        "default": "b8af5578-d22d-4d51-b4d2-9b82d619e229"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "George"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "DogCreate": {
+                "description": "A single Dog entity and the fields that can be created/updated.",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "George"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
+            "DogList": {
+                "description": "A paginated result set of Dog entities. Includes eager-loaded edges (if any) for each entity.",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/PagedResponse"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "content": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DogRead"
+                                }
+                            }
+                        },
+                        "required": [
+                            "content"
+                        ]
+                    }
+                ]
+            },
+            "DogRead": {
+                "$ref": "#/components/schemas/Dog"
+            },
+            "DogSortableFields": {
+                "description": "All potential sortable fields for Dog entities.",
+                "type": "string",
+                "enum": [
+                    "id",
+                    "name",
+                    "random"
+                ],
+                "default": "id"
+            },
+            "DogUpdate": {
+                "description": "A single Dog entity and the fields that can be created/updated.",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "George"
+                    }
+                }
+            },
             "ErrorBadRequest": {
                 "type": "object",
                 "properties": {
@@ -8816,6 +9267,140 @@
                 "description": "Filters field \"updated_at\" to be less than the provided value.",
                 "schema": {
                     "type": "number"
+                }
+            },
+            "DogID": {
+                "name": "dogID",
+                "in": "path",
+                "description": "The ID of the Dog to act upon.",
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "default": "b8af5578-d22d-4d51-b4d2-9b82d619e229"
+                }
+            },
+            "DogIDEQ": {
+                "name": "id.eq",
+                "in": "query",
+                "description": "Filters field \"id\" to be equal to the provided value.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogIDEqualFold": {
+                "name": "id.ieq",
+                "in": "query",
+                "description": "Filters field \"id\" to be equal to the provided value, case-insensitive.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogIDIn": {
+                "name": "id.in",
+                "in": "query",
+                "description": "Filters field \"id\" to be within the provided values.",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "DogIDNEQ": {
+                "name": "id.neq",
+                "in": "query",
+                "description": "Filters field \"id\" to be not equal to the provided value.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogIDNotIn": {
+                "name": "id.notIn",
+                "in": "query",
+                "description": "Filters field \"id\" to be not within the provided values.",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "DogNameContains": {
+                "name": "name.has",
+                "in": "query",
+                "description": "Filters field \"name\" to contain the provided value.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogNameContainsFold": {
+                "name": "name.ihas",
+                "in": "query",
+                "description": "Filters field \"name\" to contain the provided value, case-insensitive.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogNameEQ": {
+                "name": "name.eq",
+                "in": "query",
+                "description": "Filters field \"name\" to be equal to the provided value.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogNameEqualFold": {
+                "name": "name.ieq",
+                "in": "query",
+                "description": "Filters field \"name\" to be equal to the provided value, case-insensitive.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogNameHasPrefix": {
+                "name": "name.prefix",
+                "in": "query",
+                "description": "Filters field \"name\" to start with the provided value.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogNameHasSuffix": {
+                "name": "name.suffix",
+                "in": "query",
+                "description": "Filters field \"name\" to end with the provided value.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogNameIn": {
+                "name": "name.in",
+                "in": "query",
+                "description": "Filters field \"name\" to be within the provided values.",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "DogNameNEQ": {
+                "name": "name.neq",
+                "in": "query",
+                "description": "Filters field \"name\" to be not equal to the provided value.",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "DogNameNotIn": {
+                "name": "name.notIn",
+                "in": "query",
+                "description": "Filters field \"name\" to be not within the provided values.",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             },
             "EdgeCategoryCreatedAtGT": {
@@ -11648,6 +12233,9 @@
         },
         {
             "name": "Pets"
+        },
+        {
+            "name": "Dogs"
         },
         {
             "name": "Follows"
